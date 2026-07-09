@@ -102,9 +102,24 @@ function render(m) {
   if (chart) chart.destroy();
   chart = new Chart(document.getElementById('eqChart'), {
     type: 'line',
-    data: { labels, datasets: [{ data: d.cum, borderColor: color,
-      backgroundColor: color + '22', fill: true,
-      pointRadius: d.cum.length > 60 ? 0 : 2, borderWidth: 2, tension: 0.1 }]},
+    data: { labels, datasets: [{ data: d.cum,
+      borderColor: ctx => {
+        if (!ctx.p0 || !ctx.p1) return '#1D9E75';
+        const v0 = ctx.p0.parsed.y, v1 = ctx.p1.parsed.y;
+        // 如果這段跨越0，用終點判斷
+        return v1 >= 0 ? '#1D9E75' : '#C43C3C';
+      },
+      segment: {
+        borderColor: ctx => ctx.p1.parsed.y >= 0 ? '#1D9E75' : '#C43C3C',
+      },
+      backgroundColor: 'transparent',
+      fill: false,
+      pointRadius: d.cum.length > 60 ? 0 : 2,
+      pointBackgroundColor: ctx => {
+        const v = ctx.parsed ? ctx.parsed.y : 0;
+        return v >= 0 ? '#1D9E75' : '#C43C3C';
+      },
+      borderWidth: 2, tension: 0.1 }]},
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false },
